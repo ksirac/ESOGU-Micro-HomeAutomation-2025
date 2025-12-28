@@ -1,0 +1,77 @@
+# Project-specific exclusions
+setup_project.sh
+2025Fall_IntToMicrocomputer_TermProject_v1_5.txt
+2025Fall_IntToMicrocomputer_TermProject_v1_5.pdf
+
+# MPLAB X IDE
+*.X/dist
+*.X/build
+*.X/debug
+*.X/nbproject/private
+*.X/nbproject/Makefile-*
+*.X/nbproject/Package-*
+*.X/funclist
+*.X/mplab.xml
+*.X/nbproject/.dep.inc
+.generated_files/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# C/C++ / Compiled
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+*.hex
+*.cof
+*.hxl
+*.p1
+*.sdb
+*.sym
+*.cmf
+*.elf
+*.lst
+
+# OS Generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
