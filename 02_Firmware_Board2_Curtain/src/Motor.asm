@@ -18,12 +18,13 @@ Motor_Handler:
     
     btfsc   STATUS, 2       ; If Zero (Target == Position), Stop
     goto    Motor_Stop
-    btfsc   STATUS, 0       ; If Carry (Target > Position), Open
+    btfsc   STATUS, 0       ; If Carry (Target > Position), Open 
     goto    Open
-    goto    Close
+    goto    Close           ; If Target < Position, it will start shutting down the engine. It checks the LDR light values.
 
 Open:
-    ; Safety Check: Don't exceed Max Position
+    ; Safety Check: Don't exceed Max Position. When the potentiometer is turned one full turn, the motor is set to rotate 5 full turns.
+    ; Due to the limitation, the potentiometer has a dead zone between 4 and 5 volts.
     movlw   255
     subwf   Position, w
     btfsc   STATUS, 0
@@ -62,6 +63,7 @@ Motor_Stop:
 
 ; --- STEPPER MOTOR DRIVER ---
 Drive_Motor:
+;Depending on the step level using the Step_Count value, a different phase output (motor direction) is generated and this phase is sent to PORTB.
     movf    Step_Count, w
     andlw   0x03            ; Keep step count between 0-3
     movwf   Step_Count
