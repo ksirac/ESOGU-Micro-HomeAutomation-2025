@@ -63,13 +63,14 @@ Read_Sensors:
 
 ; --- PERCENTAGE CALCULATOR ---
 Calc_Percent:
+;This function calculates a percentage using the Position value.
     BANKSEL Position
     bcf     STATUS, 0
-    rrf     Position, w
+    rrf     Position, w       ; By right-rotating the Position value, the lowest bit is assigned to Percent_Val.
     BANKSEL Percent_Val
     movwf   Percent_Val
     movlw   100
-    subwf   Percent_Val, w
+    subwf   Percent_Val, w    ; If Percent_Val is negative (i.e., less than 0), the Percent_Val value is fixed at 100. This ensures that the percentage value remains within the 0-100 range.
     btfsc   STATUS, 0
     goto    Clamp
     return
@@ -79,17 +80,18 @@ Clamp:
     return
 
 ; --- I2C DRIVERS ---
+;These functions are used to initiate, write, and read data using the I2C communication protocol.
 I2C_Start:
     BANKSEL SSPCON2
-    bsf     SSPCON2,0
+    bsf     SSPCON2,0   ; Start Condition Enable
     goto    GW
 I2C_RepStart:
     BANKSEL SSPCON2
-    bsf     SSPCON2,1
+    bsf     SSPCON2,1   ; Repeated Start Condition Enable
     goto    GW
 I2C_Stop:
     BANKSEL SSPCON2
-    bsf     SSPCON2,2
+    bsf     SSPCON2,2   ; Stop Condition Enable
     goto    GW
 I2C_Write:
     BANKSEL SSPBUF
@@ -103,6 +105,7 @@ I2C_Read:
     movf    SSPBUF,w
     return
 I2C_Nack:
+; It sends a NACK (negative acknowledgment) to the sensor, informing the sensor that it has not received the data.
     BANKSEL SSPCON2
     bsf     SSPCON2,5
     bsf     SSPCON2,4
