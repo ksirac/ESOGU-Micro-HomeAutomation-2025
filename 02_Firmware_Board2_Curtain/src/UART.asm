@@ -23,9 +23,9 @@ UART_Handler:
 
     ; --- DECODE HEX COMMANDS ---
     ; 0x01: Get Curtain Low Byte
-    movf    Rx_Data, w
-    xorlw   0x01
-    btfsc   STATUS, 2
+    movf    Rx_Data, w           
+    xorlw   0x01               ;If a match is found, the bits in the STATUS register are checked, and the appropriate response subroutine is selected.
+    btfsc   STATUS, 2          
     goto    Ans_Zero
 
     ; 0x02: Get Curtain High Byte (Percentage)
@@ -79,6 +79,7 @@ Ans_Zero:
     return
 
 Ans_Curtain:
+;Curtain percentage is calculated.
     call    Calc_Percent
     BANKSEL Percent_Val
     movf    Percent_Val, w
@@ -91,16 +92,19 @@ Ans_Temp:
     return
 
 Ans_Pres_L:
+;It sends the low byte of pressure. Here, a constant value of 0x02 is sent.
     movlw   0x02
     call    UART_Send_Raw
     return
 
 Ans_Pres_H:
+;It sends the high byte of pressure. Here, a fixed value of 0x04 is sent.
     movlw   0x04
     call    UART_Send_Raw
     return
 
 Ans_Light:
+;It sends the data received from the light sensor (LDR). The LDR data is stored in the LDR_Val variable.
     BANKSEL LDR_Val
     movf    LDR_Val, w
     call    UART_Send_Raw
