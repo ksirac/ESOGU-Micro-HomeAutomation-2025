@@ -23,7 +23,7 @@ config WRT = OFF         ; Write protection is disabled.
 config CP = OFF          ; Program memory protection is disabled.
 
 ; --- INCLUDE VARIABLES ---
-#include "Variables.asm"
+#include "Variables.asm"               ;Defines Variables in here.
 
 ; --- RESET VECTOR ---
 PSECT resetVect,class=CODE,delta=2,abs ; indicating absolute address and It specifies that each code will be sequenced with a 2-byte (2-byte) distance between each line.
@@ -75,13 +75,13 @@ Start:
     movwf   SSPSTAT
 
     ; 5. Initialize Variables
-    BANKSEL PORTB
+    BANKSEL PORTB                     ; PORTB and orher variables are cleared.
     clrf    PORTB
     clrf    Position
     clrf    Target
     clrf    Step_Count
     clrf    Loop_Counter
-    ; Default Values
+    ; Default Values - Initial values are assigned.
     movlw   25
     movwf   Temp_H
     movlw   100
@@ -89,14 +89,16 @@ Start:
     movlw   200
     movwf   LDR_Val
 
-    ; 6. Initialize LCD
+    ; 6. Initialize LCD - It calls the function necessary for the LCD screen to function correctly.
     call    LCD_Init
 
 Main_Loop:
     ; --- UART LISTENER ---
-    call    UART_Handler
+    call    UART_Handler          ;It checks and processes the incoming data.
 
     ; --- 1. READ POTENTIOMETER ---
+    ;Using an ADC, the values ​​from the potentiometer are read and saved to the Target variable. 
+    
     BANKSEL ADCON0
     movlw   0x89
     movwf   ADCON0
@@ -109,7 +111,7 @@ Wait_P:
     movf    ADRESH, w
     movwf   Target
     
-    ; Limit 200
+    ; Limit 200 - If the potentiometer value exceeds 200, it is limited to 200. Therefore, the potentiometer will output the same value from approximately 3.90V up to 5 volts.
     movlw   200
     subwf   Target, w
     btfss   STATUS, 0
@@ -119,6 +121,7 @@ Wait_P:
 Target_OK:
 
     ; --- 2. LDR CONTROL ---
+    ;If there is insufficient light, the Target value is set to 200 (night mode).
     BANKSEL ADCON0
     movlw   0x81
     movwf   ADCON0
@@ -145,6 +148,7 @@ LDR_Skip:
     call    Motor_Handler
 
     ; --- 4. SENSOR UPDATE ---
+    ;Sensor data is processed and displayed on the LCD screen.
     call    UART_Handler    ; Check again
     
     incf    Loop_Counter, f
@@ -158,11 +162,11 @@ LDR_Skip:
 
 ; --- INCLUDE MODULES ---
 ; The assembler will insert the code from these files here.
-#include "Utils.asm"
-#include "Motor.asm"
-#include "LCD.asm"
-#include "UART.asm"
-#include "Sensors.asm"
+#include "Utils.asm"                                             ;These functions include loops used to provide various waiting times:
+#include "Motor.asm"                                             ;Here, operations such as direct control of the motor and speed adjustments can be performed. For example, the direction of the motor, rotational speed, starting and stopping states, etc.
+#include "LCD.asm"                                               ;This module includes functions that enable LCD screen control.
+#include "UART.asm"                                              ;This file contains the functions necessary to control UART (Universal Asynchronous Receiver-Transmitter) communication.
+#include "Sensors.asm"                                           ;This module contains the functions necessary for sensor reading operations.
 
 END
 
