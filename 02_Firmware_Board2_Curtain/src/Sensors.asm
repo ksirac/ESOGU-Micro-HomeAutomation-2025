@@ -14,16 +14,16 @@
 Read_Sensors:
     ; Read Temp
     call    I2C_Start
-    movlw   0xEE
+    movlw   0xEE            ;This is the address used to communicate with the sensor.
     call    I2C_Write
-    movlw   0xF4
+    movlw   0xF4            ;Temperature measurement start signal is sent.
     call    I2C_Write
     movlw   0x2E
     call    I2C_Write
     call    I2C_Stop
-    call    Wait_Short
+    call    Wait_Short      ;A short wait occurs, the time required to receive data from the sensor.
     
-    call    I2C_Start
+    call    I2C_Start       ;A new I2C connection is initiated, and temperature data is retrieved from the sensor.
     movlw   0xEE
     call    I2C_Write
     movlw   0xF6
@@ -33,16 +33,16 @@ Read_Sensors:
     call    I2C_Write
     call    I2C_Read
     movwf   Temp_H
-    call    I2C_Nack
+    call    I2C_Nack        ;A NACK (negative acknowledgment) is sent to the sensor to receive the data.
     call    I2C_Stop
     
     ; Read Pressure
     call    I2C_Start
     movlw   0xEE
     call    I2C_Write
-    movlw   0xF4
+    movlw   0xF4            ;Commands are sent to initiate pressure measurement.
     call    I2C_Write
-    movlw   0x34
+    movlw   0x34            ;Commands are sent to initiate pressure measurement.
     call    I2C_Write
     call    I2C_Stop
     call    Wait_Short
