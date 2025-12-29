@@ -4,7 +4,7 @@
 ; LESSON     : INTRODUCTION TO MICROCOMPUTERS
 ; PROJECT    : SMART CURTAIN CONTROL SYSTEM
 ; BOARD      : BOARD 2
-; AUTHOR     : CENGIZHAN GISI
+; AUTHOR     : ONUR KAPANCI
 ; FILE       : Utils.asm
 ; DESCRIPTION: This file contains general utility and delay routines used
 ;              for timing (ADC, LCD, Motor stepping).
