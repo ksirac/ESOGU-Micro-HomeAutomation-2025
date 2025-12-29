@@ -11,6 +11,7 @@
 ; ==============================================================================
 
 Wait_Short:
+;This function is assigned the value 10, providing a short wait time.
     movlw   10
     movwf   Dly1
 KL: decfsz  Dly1, f
@@ -18,6 +19,7 @@ KL: decfsz  Dly1, f
     return
 
 Wait_Long:
+;This function is assigned the value 100, resulting in a long wait time. and the duration is extended through nested loops.
     movlw   100
     movwf   Dly1
 U1: movlw   255
@@ -29,6 +31,7 @@ U2: decfsz  Dly2, f
     return
 
 Wait_Meas:
+;This function provides a moderate waiting period for the measurement.
     movlw   50
     movwf   Dly1
     movlw   50
@@ -40,6 +43,7 @@ ML: decfsz  Dly2, f
     return
 
 Wait_Motor:
+;This function is used to control the motor's standby time.
     movlw   40
     movwf   Dly1
 M1: movlw   50
