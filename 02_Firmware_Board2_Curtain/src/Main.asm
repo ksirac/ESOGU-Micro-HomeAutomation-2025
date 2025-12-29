@@ -13,20 +13,20 @@ PROCESSOR 16F877A
 #include <xc.inc>
 
 ; --- CONFIGURATION BITS ---
-config FOSC = HS
-config WDTE = OFF
-config PWRTE = ON
-config BOREN = OFF
-config LVP = OFF
-config CPD = OFF
-config WRT = OFF
-config CP = OFF
+config FOSC = HS         ; A high-speed oscillator is used.
+config WDTE = OFF        ; Watchdog Timer is disabled.
+config PWRTE = ON        ; The power-up timer is activated.
+config BOREN = OFF       ; Brown-out reset (low voltage) is disabled.
+config LVP = OFF         ; Low Voltage Programming is disabled.
+config CPD = OFF         ; Data EEPROM code protection is disabled.
+config WRT = OFF         ; Write protection is disabled.
+config CP = OFF          ; Program memory protection is disabled.
 
 ; --- INCLUDE VARIABLES ---
 #include "Variables.asm"
 
 ; --- RESET VECTOR ---
-PSECT resetVect,class=CODE,delta=2,abs
+PSECT resetVect,class=CODE,delta=2,abs ; indicating absolute address and It specifies that each code will be sequenced with a 2-byte (2-byte) distance between each line.
 ORG 0x0000
     clrf    PCLATH
     goto    Start
@@ -37,39 +37,39 @@ PSECT code,class=CODE,delta=2
 Start:
     ; 1. Port Configuration
     BANKSEL TRISA
-    movlw   0xFF
+    movlw   0xFF  ; PORTA all bits are inputs
     movwf   TRISA
-    BANKSEL TRISB
+    BANKSEL TRISB ; PORTB all bits are outputs
     clrf    TRISB
     BANKSEL TRISD
-    clrf    TRISD
+    clrf    TRISD ; PORTD all bits are outputs
     BANKSEL TRISC
-    movlw   0x98
+    movlw   0x98  ; Some pins of PORTC are configured as inputs, and some are configured as outputs.
     movwf   TRISC
 
-    ; 2. ADC Configuration
+    ; 2. ADC Configuration - Analog inputs are configured to be read digitally.
     BANKSEL ADCON1
-    movlw   0x04
+    movlw   0x04 ; 
     movwf   ADCON1
     
     ; 3. UART Configuration
     BANKSEL SPBRG
     movlw   25
-    movwf   SPBRG
+    movwf   SPBRG ; It sets the baud rate to 9600.
     BANKSEL TXSTA
     movlw   0x24
-    movwf   TXSTA
+    movwf   TXSTA ; Transmit
     BANKSEL RCSTA
-    movlw   0x90
-    movwf   RCSTA
+    movlw   0x90  
+    movwf   RCSTA ; Receivet
 
     ; 4. I2C Configuration
     BANKSEL SSPCON
-    movlw   0x28
+    movlw   0x28    ; I2C mode active
     movwf   SSPCON
     BANKSEL SSPADD
     movlw   9
-    movwf   SSPADD
+    movwf   SSPADD  ; Set I2C time speed
     BANKSEL SSPSTAT
     movlw   0x80
     movwf   SSPSTAT
