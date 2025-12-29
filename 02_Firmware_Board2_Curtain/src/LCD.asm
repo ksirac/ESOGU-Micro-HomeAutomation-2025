@@ -11,7 +11,8 @@
 ; ==============================================================================
 
 LCD_Print_Full:
-    ; Line 1: +25.0C  1026hPa
+    ; Line 1: +0.0C  0000hPa
+    ;Since temperature and pressure values ​​could not be obtained, fixed values ​​were printed.
     movlw   0x80
     call    Command
     movlw   '+'
@@ -48,6 +49,7 @@ LCD_Print_Full:
     call    Data
     
     ; Line 2: 00xxxLux  xx.0%
+    ;The location where the position and light values ​​are received from the relevant sensors and printed.
     movlw   0xC0
     call    Command
     movlw   '0'
@@ -79,6 +81,7 @@ LCD_Print_Full:
     call    Print_2_Digits
     goto    LCD_End
 Write_100_LCD:
+;Exceeding is prevented.
     movlw   '1'
     call    Data
     movlw   '0'
@@ -95,6 +98,7 @@ LCD_End:
     return
 
 ; --- LCD INITIALIZATION & DRIVERS ---
+;First, three 4-bit data transmissions are performed to initialize the LCD (0x03 is sent three times).
 LCD_Init:
     call    Wait_Long
     movlw   0x03
@@ -109,20 +113,22 @@ LCD_Init:
     movlw   0x02
     call    Nibble
     call    Wait_Long
-    movlw   0x28
+    movlw   0x28           ;The operating mode is initiated with 4-bit data.
     call    Command
-    movlw   0x0C
+    movlw   0x0C           ;Turns on the LCD and displays the screen (no cursor).
     call    Command
-    movlw   0x06
+    movlw   0x06           ;The screen will then advance after the writing process is complete.
     call    Command
-    movlw   0x01
+    movlw   0x01           ;The screen is cleaned.
     call    Command
     call    Wait_Long
     return
 Command:
+;It sends to command to LCD
     bcf     PORTD, 2
     goto    Sender
 Data:
+;It sends data (characters) to the LCD.
     bsf     PORTD, 2
 Sender:
     movwf   Temp
@@ -133,6 +139,7 @@ Sender:
     call    Wait_Short
     return
 Nibble:
+;It performs 4-bit data transmission.
     andlw   0x0F
     movwf   Nibble_Hold
     swapf   Nibble_Hold, w
@@ -147,7 +154,9 @@ Nibble:
     return
 
 ; --- NUMBER PRINTING HELPERS ---
+;These functions are used to display numbers on the LCD. The numbers are separated by digit, and each digit is printed on the LCD.
 Print_3_Digits:
+;The variables Digit_One, Digit_Ten, and Digit_Hun store each digit of the number and print it to the LCD.
     movwf   Digit_One
     clrf    Digit_Hun
     clrf    Digit_Ten
@@ -177,6 +186,7 @@ L3_1: movf  Digit_Hun, w
     return
 
 Print_2_Digits:
+;The Digit_One and Digit_Ten variables store each digit of the number and print it to the LCD.
     movwf   Digit_One
     clrf    Digit_Ten
 L2_10: movlw 10
