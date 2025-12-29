@@ -4,7 +4,7 @@
 ; LESSON     : INTRODUCTION TO MICROCOMPUTERS
 ; PROJECT    : SMART CURTAIN CONTROL SYSTEM
 ; BOARD      : BOARD 2
-; AUTHOR     : CENGIZHAN GISI
+; AUTHOR     : ONUR KAPANCI
 ; FILE       : Variables.asm
 ; DESCRIPTION: This file contains the memory allocation and variable definitions
 ;              used throughout the project (Bank 0).
