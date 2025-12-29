@@ -131,12 +131,16 @@ Wait_L:
     movf    ADRESH, w
     movwf   LDR_Val
     
-    ; Night Mode Check
-    movlw   100
+    ; Night Mode Check - The LDR was operating in reverse. The `btfss` command was being used here. It was replaced with the `btfsc` command, the `clrf` function in the `target` variable was disabled, and 200 was written to it and transferred to the `target` variable. The `LDR_Skip` subfunction was added. Thus, when the LDR does not receive sufficient light, the shutter position is set to 100%.
+     movlw   100
     subwf   LDR_Val, w
-    btfss   STATUS, 0
-    clrf    Target
+    btfsc   STATUS, 0
+    goto LDR_Skip
+    
+    movlw 200
+    movwf Target
 
+LDR_Skip:
     ; --- 3. MOTOR CONTROL ---
     call    Motor_Handler
 
