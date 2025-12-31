@@ -1,10 +1,13 @@
 ; ==============================================================================
 ; UNIVERSITY : ESKISEHIR OSMANGAZI UNIVERSITY
 ; DEPARTMENT : ELECTRICAL AND ELECTRONICS ENGINEERING
+; LESSON     : INTRODUCTION TO MICROCOMPUTERS
 ; PROJECT    : SMART CURTAIN CONTROL SYSTEM
 ; BOARD      : BOARD 2
+; AUTHOR     : CENGIZHAN GISI
 ; FILE       : LCD.asm
-; DESCRIPTION: LCD Display Driver (16x2, 4-bit mode)
+; DESCRIPTION: This file contains LCD initialization and printing routines.
+;              It formats the display according to Project Requirement [R2.2.5-1].
 ; ==============================================================================
 
 LCD_Init:
@@ -48,7 +51,8 @@ LCD_Clear:
     return
 
 LCD_Print_Full:
-    ; Line 1: Fixed Temperature and Pressure
+    ; Line 1: +0.0C  0000hPa
+    ;Since temperature and pressure values ââcould not be obtained, fixed values ââwere printed.
     movlw   0x80
     call    Command
     
@@ -87,7 +91,8 @@ LCD_Print_Full:
     movlw   'a'
     call    Data
 
-    ; Line 2: Live LDR and Curtain Values
+    ; Line 2: 00xxxLux  xx.0%
+    ;The location where the position and light values ââare received from the relevant sensors and printed.
     movlw   0xC0
     call    Command
     
@@ -157,14 +162,17 @@ Print_10:
     call    Data
     return
 
-; --- LCD DRIVERS ---
+; --- LCD INITIALIZATION & DRIVERS ---
+;First, three 4-bit data transmissions are performed to initialize the LCD (0x03 is sent three times).
 Command:
+;It sends to command to LCD
     BANKSEL Temp_Var
     movwf   Temp_Var
     BANKSEL PORTD
     bcf     PORTD, 2
     goto    Send
 Data:
+;It sends data (characters) to the LCD.
     BANKSEL Temp_Var
     movwf   Temp_Var
     BANKSEL PORTD
