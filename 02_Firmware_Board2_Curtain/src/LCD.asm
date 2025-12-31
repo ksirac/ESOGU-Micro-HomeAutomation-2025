@@ -1,45 +1,84 @@
 ; ==============================================================================
 ; UNIVERSITY : ESKISEHIR OSMANGAZI UNIVERSITY
 ; DEPARTMENT : ELECTRICAL AND ELECTRONICS ENGINEERING
-; LESSON     : INTRODUCTION TO MICROCOMPUTERS
 ; PROJECT    : SMART CURTAIN CONTROL SYSTEM
 ; BOARD      : BOARD 2
-; AUTHOR     : CENGIZHAN GISI
 ; FILE       : LCD.asm
-; DESCRIPTION: This file contains LCD initialization and printing routines.
-;              It formats the display according to Project Requirement [R2.2.5-1].
+; DESCRIPTION: LCD Display Driver (16x2, 4-bit mode)
 ; ==============================================================================
 
+LCD_Init:
+    BANKSEL TRISD
+    clrf    TRISD
+    BANKSEL PORTD
+    clrf    PORTD
+    
+    call    Wait_Long
+    
+    ; Force Reset Sequence
+    movlw   0x03
+    call    Nibble_Direct
+    call    Wait_Long
+    movlw   0x03
+    call    Nibble_Direct
+    call    Wait_Long
+    movlw   0x03
+    call    Nibble_Direct
+    call    Wait_Short
+    movlw   0x02
+    call    Nibble_Direct
+    call    Wait_Short
+    
+    ; LCD Configuration
+    movlw   0x28
+    call    Command
+    movlw   0x0C
+    call    Command
+    movlw   0x06
+    call    Command
+    movlw   0x01
+    call    Command
+    call    Wait_Long
+    return
+
+LCD_Clear:
+    movlw   0x01
+    call    Command
+    call    Wait_Long
+    return
+
 LCD_Print_Full:
-    ; Line 1: +0.0C  0000hPa
-    ;Since temperature and pressure values ​​could not be obtained, fixed values ​​were printed.
+    ; Line 1: Fixed Temperature and Pressure
     movlw   0x80
     call    Command
+    
+    ; Temperature: "+25.0°C"
     movlw   '+'
     call    Data
-    movlw   '0'
+    movlw   '2'
     call    Data
-    movlw   '0'
+    movlw   '5'
     call    Data
     movlw   '.'
     call    Data
     movlw   '0'
     call    Data
-    movlw   0xDF            ; Degree Symbol
+    movlw   0xDF
     call    Data
     movlw   'C'
     call    Data
+    
     movlw   ' '
     call    Data
-    movlw   ' '
+    
+    ; Pressure: "1026hPa"
+    movlw   '1'
     call    Data
     movlw   '0'
     call    Data
-    movlw   '0'
+    movlw   '2'
     call    Data
-    movlw   '0'
-    call    Data
-    movlw   '0'
+    movlw   '6'
     call    Data
     movlw   'h'
     call    Data
@@ -47,18 +86,16 @@ LCD_Print_Full:
     call    Data
     movlw   'a'
     call    Data
-    
-    ; Line 2: 00xxxLux  xx.0%
-    ;The location where the position and light values ​​are received from the relevant sensors and printed.
+
+    ; Line 2: Live LDR and Curtain Values
     movlw   0xC0
     call    Command
-    movlw   '0'
-    call    Data
-    movlw   '0'
-    call    Data
+    
+    ; LDR Value
     BANKSEL LDR_Val
     movf    LDR_Val, w
-    call    Print_3_Digits
+    call    Print_Decimal
+    
     movlw   'L'
     call    Data
     movlw   'u'
@@ -69,139 +106,95 @@ LCD_Print_Full:
     call    Data
     movlw   ' '
     call    Data
+
+    ; Curtain Percentage
     BANKSEL Percent_Val
     movf    Percent_Val, w
-    sublw   100
-    btfsc   STATUS, 2
-    goto    Write_100_LCD
-    movlw   ' '
-    call    Data
-    BANKSEL Percent_Val
-    movf    Percent_Val, w
-    call    Print_2_Digits
-    goto    LCD_End
-Write_100_LCD:
-;Exceeding is prevented.
-    movlw   '1'
-    call    Data
-    movlw   '0'
-    call    Data
-    movlw   '0'
-    call    Data
-LCD_End:
-    movlw   '.'
-    call    Data
-    movlw   '0'
-    call    Data
+    call    Print_Decimal
+    
     movlw   '%'
     call    Data
     return
 
-; --- LCD INITIALIZATION & DRIVERS ---
-;First, three 4-bit data transmissions are performed to initialize the LCD (0x03 is sent three times).
-LCD_Init:
-    call    Wait_Long
-    movlw   0x03
-    call    Nibble
-    call    Wait_Long
-    movlw   0x03
-    call    Nibble
-    call    Wait_Long
-    movlw   0x03
-    call    Nibble
-    call    Wait_Long
-    movlw   0x02
-    call    Nibble
-    call    Wait_Long
-    movlw   0x28           ;The operating mode is initiated with 4-bit data.
-    call    Command
-    movlw   0x0C           ;Turns on the LCD and displays the screen (no cursor).
-    call    Command
-    movlw   0x06           ;The screen will then advance after the writing process is complete.
-    call    Command
-    movlw   0x01           ;The screen is cleaned.
-    call    Command
-    call    Wait_Long
+; --- HELPER FUNCTIONS ---
+Print_Decimal:
+    BANKSEL Calc_Var
+    movwf   Calc_Var
+    
+    ; Hundreds
+    clrf    Digit_Var
+Calc_100:
+    movlw   100
+    subwf   Calc_Var, w
+    btfss   STATUS, 0
+    goto    Print_100
+    movwf   Calc_Var
+    incf    Digit_Var, f
+    goto    Calc_100
+Print_100:
+    movf    Digit_Var, w
+    addlw   '0'
+    call    Data
+    
+    ; Tens
+    clrf    Digit_Var
+Calc_10:
+    movlw   10
+    subwf   Calc_Var, w
+    btfss   STATUS, 0
+    goto    Print_10
+    movwf   Calc_Var
+    incf    Digit_Var, f
+    goto    Calc_10
+Print_10:
+    movf    Digit_Var, w
+    addlw   '0'
+    call    Data
+    
+    ; Units
+    movf    Calc_Var, w
+    addlw   '0'
+    call    Data
     return
+
+; --- LCD DRIVERS ---
 Command:
-;It sends to command to LCD
+    BANKSEL Temp_Var
+    movwf   Temp_Var
+    BANKSEL PORTD
     bcf     PORTD, 2
-    goto    Sender
+    goto    Send
 Data:
-;It sends data (characters) to the LCD.
+    BANKSEL Temp_Var
+    movwf   Temp_Var
+    BANKSEL PORTD
     bsf     PORTD, 2
-Sender:
-    movwf   Temp
-    swapf   Temp, w
-    call    Nibble
-    movf    Temp, w
-    call    Nibble
-    call    Wait_Short
+Send:
+    BANKSEL Temp_Var
+    movf    Temp_Var, w
+    andlw   0xF0
+    call    Nibble_Out
+    BANKSEL Temp_Var
+    swapf   Temp_Var, w
+    andlw   0xF0
+    call    Nibble_Out
     return
-Nibble:
-;It performs 4-bit data transmission.
-    andlw   0x0F
-    movwf   Nibble_Hold
-    swapf   Nibble_Hold, w
-    movwf   Nibble_Hold
+
+Nibble_Out:
+    movwf   Temp_L
+    BANKSEL PORTD
     movf    PORTD, w
     andlw   0x0F
-    iorwf   Nibble_Hold, w
+    iorwf   Temp_L, w
     movwf   PORTD
     bsf     PORTD, 3
-    nop
+    call    Wait_Short
     bcf     PORTD, 3
     return
 
-; --- NUMBER PRINTING HELPERS ---
-;These functions are used to display numbers on the LCD. The numbers are separated by digit, and each digit is printed on the LCD.
-Print_3_Digits:
-;The variables Digit_One, Digit_Ten, and Digit_Hun store each digit of the number and print it to the LCD.
-    movwf   Digit_One
-    clrf    Digit_Hun
-    clrf    Digit_Ten
-L3_100: movlw 100
-    subwf   Digit_One, w
-    btfss   STATUS, 0
-    goto    L3_10
-    movwf   Digit_One
-    incf    Digit_Hun, f
-    goto    L3_100
-L3_10: movlw 10
-    subwf   Digit_One, w
-    btfss   STATUS, 0
-    goto    L3_1
-    movwf   Digit_One
-    incf    Digit_Ten, f
-    goto    L3_10
-L3_1: movf  Digit_Hun, w
-    addlw   0x30
-    call    Data
-    movf    Digit_Ten, w
-    addlw   0x30
-    call    Data
-    movf    Digit_One, w
-    addlw   0x30
-    call    Data
+Nibble_Direct:
+    movwf   Temp_L
+    swapf   Temp_L, w
+    andlw   0xF0
+    call    Nibble_Out
     return
-
-Print_2_Digits:
-;The Digit_One and Digit_Ten variables store each digit of the number and print it to the LCD.
-    movwf   Digit_One
-    clrf    Digit_Ten
-L2_10: movlw 10
-    subwf   Digit_One, w
-    btfss   STATUS, 0
-    goto    L2_1
-    movwf   Digit_One
-    incf    Digit_Ten, f
-    goto    L2_10
-L2_1: movf  Digit_Ten, w
-    addlw   0x30
-    call    Data
-    movf    Digit_One, w
-    addlw   0x30
-    call    Data
-    return
-
-

@@ -1,71 +1,65 @@
 ; ==============================================================================
 ; UNIVERSITY : ESKISEHIR OSMANGAZI UNIVERSITY
 ; DEPARTMENT : ELECTRICAL AND ELECTRONICS ENGINEERING
-; LESSON     : INTRODUCTION TO MICROCOMPUTERS
 ; PROJECT    : SMART CURTAIN CONTROL SYSTEM
 ; BOARD      : BOARD 2
-; AUTHOR     : CENGIZHAN GISI
 ; FILE       : Motor.asm
-; DESCRIPTION: This file contains the logic for controlling the Stepper Motor.
-;              It compares Target vs Position and drives the motor coils.
+; DESCRIPTION: Stepper Motor Control Logic (4-phase unipolar)
 ; ==============================================================================
 
-; --- MOTOR CONTROL LOGIC ---
 Motor_Handler:
     BANKSEL Position
     movf    Position, w
-    subwf   Target, w       ; Calculate (Target - Position)
+    subwf   Target, w
     
-    btfsc   STATUS, 2       ; If Zero (Target == Position), Stop
+    btfsc   STATUS, 2
     goto    Motor_Stop
-    btfsc   STATUS, 0       ; If Carry (Target > Position), Open 
+    btfsc   STATUS, 0
     goto    Open
-    goto    Close           ; If Target < Position, it will start shutting down the engine. It checks the LDR light values.
+    goto    Close
 
 Open:
-    ; Safety Check: Don't exceed Max Position. When the potentiometer is turned one full turn, the motor is set to rotate 5 full turns.
-    ; Due to the limitation, the potentiometer has a dead zone between 4 and 5 volts.
+    ; Upper Limit Check
     movlw   255
     subwf   Position, w
     btfsc   STATUS, 0
-    return                  ; Exit if limit reached
+    return
     
-    incf    Position, f     ; Increment Position
-    movlw   5               ; Motor steps per unit
+    incf    Position, f
+    movlw   5
     movwf   Temp
 Open_Loop:
     incf    Step_Count, f
-    call    Drive_Motor     ; Step the motor
+    call    Drive_Motor
     decfsz  Temp, f
     goto    Open_Loop
     return
 
 Close:
-    ; Safety Check: Don't go below Zero
+    ; Lower Limit Check
     movf    Position, f
     btfsc   STATUS, 2
-    return                  ; Exit if limit reached
+    return
     
-    decf    Position, f     ; Decrement Position
-    movlw   5               ; Motor steps per unit
+    decf    Position, f
+    movlw   5
     movwf   Temp
 Close_Loop:
     decf    Step_Count, f
-    call    Drive_Motor     ; Step the motor
+    call    Drive_Motor
     decfsz  Temp, f
     goto    Close_Loop
     return
 
 Motor_Stop:
     BANKSEL PORTB
-    clrf    PORTB           ; De-energize motor coils
+    clrf    PORTB
     return
 
 ; --- STEPPER MOTOR DRIVER ---
 Drive_Motor:
-;Depending on the step level using the Step_Count value, a different phase output (motor direction) is generated and this phase is sent to PORTB.
     movf    Step_Count, w
-    andlw   0x03            ; Keep step count between 0-3
+    andlw   0x03
     movwf   Step_Count
     movf    Step_Count, w
     xorlw   0
@@ -87,8 +81,6 @@ B1: movlw   0x02
 B2: movlw   0x04
     goto    BB
 B3: movlw   0x08
-BB: movwf   PORTB           ; Output phase to PORTB
+BB: movwf   PORTB
     call    Wait_Motor
     return
-
-

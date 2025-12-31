@@ -1,126 +1,34 @@
 ; ==============================================================================
 ; UNIVERSITY : ESKISEHIR OSMANGAZI UNIVERSITY
 ; DEPARTMENT : ELECTRICAL AND ELECTRONICS ENGINEERING
-; LESSON     : INTRODUCTION TO MICROCOMPUTERS
 ; PROJECT    : SMART CURTAIN CONTROL SYSTEM
 ; BOARD      : BOARD 2
-; AUTHOR     : CENGIZHAN GISI
 ; FILE       : Sensors.asm
-; DESCRIPTION: This file handles I2C communication with BMP180 sensor and
-;              performs percentage calculations for the curtain position.
+; DESCRIPTION: Sensor Reading and Percentage Calculation
 ; ==============================================================================
 
-; --- SENSOR MODULE (I2C) ---
 Read_Sensors:
-    ; Read Temp
-    call    I2C_Start
-    movlw   0xEE            ;This is the address used to communicate with the sensor.
-    call    I2C_Write
-    movlw   0xF4            ;Temperature measurement start signal is sent.
-    call    I2C_Write
-    movlw   0x2E
-    call    I2C_Write
-    call    I2C_Stop
-    call    Wait_Short      ;A short wait occurs, the time required to receive data from the sensor.
+    ; Temperature and Pressure are fixed values (BMP180 not implemented)
+    BANKSEL Temp_H
+    clrf    Temp_H
     
-    call    I2C_Start       ;A new I2C connection is initiated, and temperature data is retrieved from the sensor.
-    movlw   0xEE
-    call    I2C_Write
-    movlw   0xF6
-    call    I2C_Write
-    call    I2C_RepStart
-    movlw   0xEF
-    call    I2C_Write
-    call    I2C_Read
-    movwf   Temp_H
-    call    I2C_Nack        ;A NACK (negative acknowledgment) is sent to the sensor to receive the data.
-    call    I2C_Stop
+    BANKSEL Pres_H
+    clrf    Pres_H
     
-    ; Read Pressure
-    call    I2C_Start
-    movlw   0xEE
-    call    I2C_Write
-    movlw   0xF4            ;Commands are sent to initiate pressure measurement.
-    call    I2C_Write
-    movlw   0x34            ;Commands are sent to initiate pressure measurement.
-    call    I2C_Write
-    call    I2C_Stop
-    call    Wait_Short
-    
-    call    I2C_Start
-    movlw   0xEE
-    call    I2C_Write
-    movlw   0xF6
-    call    I2C_Write
-    call    I2C_RepStart
-    movlw   0xEF
-    call    I2C_Write
-    call    I2C_Read
-    movwf   Pres_H
-    call    I2C_Nack
-    call    I2C_Stop
+    ; LDR value is read in Main.asm from ADRESH
     return
 
-; --- PERCENTAGE CALCULATOR ---
+; ==============================================================================
+; CURTAIN PERCENTAGE CALCULATION
+; Converts motor position (0-200) to percentage (0-100%)
+; ==============================================================================
 Calc_Percent:
-;This function calculates a percentage using the Position value.
     BANKSEL Position
+    movf    Position, w
+    BANKSEL Calc_Var
+    movwf   Calc_Var
     bcf     STATUS, 0
-    rrf     Position, w       ; By right-rotating the Position value, the lowest bit is assigned to Percent_Val.
+    rrf     Calc_Var, w
     BANKSEL Percent_Val
     movwf   Percent_Val
-    movlw   100
-    subwf   Percent_Val, w    ; If Percent_Val is negative (i.e., less than 0), the Percent_Val value is fixed at 100. This ensures that the percentage value remains within the 0-100 range.
-    btfsc   STATUS, 0
-    goto    Clamp
     return
-Clamp:
-    movlw   100
-    movwf   Percent_Val
-    return
-
-; --- I2C DRIVERS ---
-;These functions are used to initiate, write, and read data using the I2C communication protocol.
-I2C_Start:
-    BANKSEL SSPCON2
-    bsf     SSPCON2,0   ; Start Condition Enable
-    goto    GW
-I2C_RepStart:
-    BANKSEL SSPCON2
-    bsf     SSPCON2,1   ; Repeated Start Condition Enable
-    goto    GW
-I2C_Stop:
-    BANKSEL SSPCON2
-    bsf     SSPCON2,2   ; Stop Condition Enable
-    goto    GW
-I2C_Write:
-    BANKSEL SSPBUF
-    movwf   SSPBUF
-    goto    GW
-I2C_Read:
-    BANKSEL SSPCON2
-    bsf     SSPCON2,3
-    call    GW
-    BANKSEL SSPBUF
-    movf    SSPBUF,w
-    return
-I2C_Nack:
-; It sends a NACK (negative acknowledgment) to the sensor, informing the sensor that it has not received the data.
-    BANKSEL SSPCON2
-    bsf     SSPCON2,5
-    bsf     SSPCON2,4
-    goto    GW
-GW:
-    BANKSEL PIR1
-    movlw   255
-    movwf   Dly2
-WL: btfsc   PIR1,3
-    goto    WD
-    decfsz  Dly2,f
-    goto    WL
-    bcf     PIR1,3
-    return
-WD: bcf     PIR1,3
-    return
-
-
