@@ -1,8 +1,10 @@
 ; ==============================================================================
 ; UNIVERSITY : ESKISEHIR OSMANGAZI UNIVERSITY
 ; DEPARTMENT : ELECTRICAL AND ELECTRONICS ENGINEERING
+; LESSON     : INTRODUCTION TO MICROCOMPUTERS
 ; PROJECT    : SMART CURTAIN CONTROL SYSTEM
 ; BOARD      : BOARD 2
+; AUTHOR     : ONUR KAPANCI
 ; FILE       : Variables.asm
 ; DESCRIPTION: RAM Variable Definitions
 ; ==============================================================================
