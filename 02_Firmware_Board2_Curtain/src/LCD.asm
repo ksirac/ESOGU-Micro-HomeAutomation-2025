@@ -52,7 +52,7 @@ LCD_Print_Full:
     movlw   0x80
     call    Command
     
-    ; Temperature: "+25.0°C"
+    ; Temperature: "+25.0Â°C"
     movlw   '+'
     call    Data
     movlw   '2'
