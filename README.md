@@ -93,3 +93,44 @@ The system uses a custom byte-protocol. Below are key examples:
 ---
 
 *Created for ESOGU Electrical-Electronics & Computer Engineering Departments.*
+
+---
+
+## 📄 CV / Resume Reference
+
+If you want to add this project to your CV/résumé, you can use the details below.
+
+### Official Project Name
+> **Microcontroller-Based Home Automation System**
+> *(Türkçe: Mikrodenetleyici Tabanlı Ev Otomasyonu Sistemi)*
+
+### Suggested CV Entry (English)
+```
+Microcontroller-Based Home Automation System                       2025
+Eskişehir Osmangazi University – Microcomputers Course Term Project
+• Designed a distributed home-automation system using two PIC16F877A
+  microcontrollers programmed in Assembly language.
+• Implemented a closed-loop climate controller (Asymmetric Hysteresis FSM)
+  and a curtain-control board with stepper-motor and LDR-based night mode.
+• Developed a Python/PyQt5 GUI dashboard communicating with both boards
+  over UART (custom hex command protocol).
+Technologies: PIC16F877A · Assembly (MPLAB X) · Python · PyQt5 · PySerial · UART
+```
+
+### Suggested CV Entry (Türkçe)
+```
+Mikrodenetleyici Tabanlı Ev Otomasyonu Sistemi                     2025
+Eskişehir Osmangazi Üniversitesi – Mikrobilgisayarlara Giriş Dönem Projesi
+• Assembly dili ile programlanmış iki PIC16F877A mikrodenetleyiciden oluşan
+  dağıtık bir ev otomasyonu sistemi tasarlandı.
+• Asimetrik histerezis algoritmasıyla kapalı döngü iklim kontrolü ve
+  adım motorlu, LDR tabanlı gece modu içeren perde kontrol kartı geliştirildi.
+• UART üzerinden özel hex komut protokolüyle her iki kartla iletişim kuran
+  Python/PyQt5 arayüzü yazıldı.
+Teknolojiler: PIC16F877A · Assembly (MPLAB X) · Python · PyQt5 · PySerial · UART
+```
+
+### GitHub Repository
+```
+https://github.com/ksirac/ESOGU-Micro-HomeAutomation-2025
+```
